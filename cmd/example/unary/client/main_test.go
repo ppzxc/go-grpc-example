@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/ppzxc/go-grpc-examples-benchmark/cmd/unary"
-	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/unary"
+	"github.com/ppzxc/go-grpc-examples-benchmark/cmd/example/unary"
+	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/example"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -18,7 +18,7 @@ func init() {
 		}
 
 		s := grpc.NewServer()
-		pb.RegisterUnaryExampleServer(s, &unary.UnaryEchoServer{})
+		pb.RegisterExampleServer(s, &unary.UnaryEchoServer{})
 		if err := s.Serve(l); err != nil {
 			log.Println(err)
 		}
@@ -30,12 +30,12 @@ func BenchmarkLocalServer(b *testing.B) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := pb.NewUnaryExampleClient(conn)
+	c := pb.NewExampleClient(conn)
 	payload := GenerateRandomBytes(*payloadLength)
 
 	b.Run("SINGLE", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			pur := &pb.UnaryRequest{
+			pur := &pb.Request{
 				Uid:          uint64(i),
 				Message:      payload,
 				Len:          int32(len(payload)),

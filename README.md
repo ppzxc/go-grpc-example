@@ -7,16 +7,16 @@
 2. cd go-grpc-examples-benchmark
 3. make all
 4. server side
- - ./server -port 9990
+ - ./unary_server -port 9990
 5. client side
- - ./client -ip 192.168.0.65 -port 9990 -len 65536 -conn 20 -worker 5
- - ./client -ip 192.168.0.65 -port 9990 -len 32768 -conn 5 -worker 5
- - ./client -ip 192.168.0.65 -port 9990 -len 512 -conn 5 -worker 1
+ - ./unary_client -ip 192.168.0.65 -port 9990 -len 65536 -conn 20 -worker 5
+ - ./unary_client -ip 192.168.0.65 -port 9990 -len 32768 -conn 5 -worker 5
+ - ./unary_client -ip 192.168.0.65 -port 9990 -len 512 -conn 5 -worker 1
 
 ## flags
 
 ```protobuf
-message UnaryRequest {
+message Request {
   uint64 uid = 1;
   bytes message = 2;
   int32 len = 3;

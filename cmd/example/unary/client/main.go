@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"flag"
-	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/unary"
+	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/example"
 	"google.golang.org/grpc"
 	"log"
 	"os"
@@ -82,7 +82,7 @@ func (u *UUID) Get() uint64 {
 var Uuid UUID
 
 func NewGRPCClient(ctx context.Context, cn int, gn int, conn *grpc.ClientConn, wg *sync.WaitGroup, payload []byte) {
-	c := pb.NewUnaryExampleClient(conn)
+	c := pb.NewExampleClient(conn)
 	go func() {
 		defer wg.Done()
 		for {
@@ -91,7 +91,7 @@ func NewGRPCClient(ctx context.Context, cn int, gn int, conn *grpc.ClientConn, w
 				break
 			default:
 			}
-			pur := &pb.UnaryRequest{
+			pur := &pb.Request{
 				Uid:          Uuid.Get(),
 				Message:      payload,
 				Len:          int32(len(payload)),

@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"github.com/ppzxc/go-grpc-examples-benchmark/cmd/unary"
+	"github.com/ppzxc/go-grpc-examples-benchmark/cmd/example/unary"
 	"runtime"
 )
 

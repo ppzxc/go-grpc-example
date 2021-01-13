@@ -2,7 +2,7 @@ package unary
 
 import (
 	"context"
-	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/unary"
+	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/example"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -13,12 +13,12 @@ import (
 )
 
 type UnaryEchoServer struct {
-	Unary *pb.UnaryRequest
+	Unary *pb.Request
 }
 
-func (u *UnaryEchoServer) UnaryEcho(ctx context.Context, unaryMessage *pb.UnaryRequest) (*pb.UnaryResponse, error) {
+func (u *UnaryEchoServer) UnaryEcho(ctx context.Context, unaryMessage *pb.Request) (*pb.Response, error) {
 	log.Printf("SUBMIT REQUEST CN:%d GN:%d UID:%d MLEN:%d LEN:%d", unaryMessage.GetConnNumber(), unaryMessage.GetWorkerNumber(), unaryMessage.GetUid(), len(unaryMessage.GetMessage()), unaryMessage.GetLen())
-	return &pb.UnaryResponse{
+	return &pb.Response{
 		Uid:     unaryMessage.Uid,
 		Message: unaryMessage.Message,
 		Len:     int32(len(unaryMessage.Message)),
@@ -32,7 +32,7 @@ func ExecGRPCServer(p int) {
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterUnaryExampleServer(s, &UnaryEchoServer{})
+	pb.RegisterExampleServer(s, &UnaryEchoServer{})
 
 	log.Printf("gRPC Server [%s]", l.Addr().String())
 
