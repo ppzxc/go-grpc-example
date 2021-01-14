@@ -2,13 +2,24 @@ package main
 
 import (
 	"context"
-	"github.com/ppzxc/go-grpc-examples-benchmark/cmd/example/unary"
 	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/example"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 	"testing"
 )
+
+type server struct {
+	pb.UnimplementedExampleServer
+}
+
+func (u *server) Echo(ctx context.Context, Message *pb.Request) (*pb.Response, error) {
+	return &pb.Response{
+		Uid:     Message.Uid,
+		Message: Message.Message,
+		Len:     int32(len(Message.Message)),
+	}, nil
+}
 
 func init() {
 	go func() {
@@ -18,7 +29,7 @@ func init() {
 		}
 
 		s := grpc.NewServer()
-		pb.RegisterExampleServer(s, &unary.UnaryEchoServer{})
+		pb.RegisterExampleServer(s, &server{})
 		if err := s.Serve(l); err != nil {
 			log.Println(err)
 		}
@@ -42,7 +53,7 @@ func BenchmarkLocalServer(b *testing.B) {
 				ConnNumber:   int32(1),
 				WorkerNumber: int32(1),
 			}
-			ur, err := c.UnaryEcho(context.Background(), pur)
+			ur, err := c.Echo(context.Background(), pur)
 			if err != nil {
 				log.Fatal(err)
 			}

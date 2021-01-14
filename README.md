@@ -7,11 +7,11 @@
 2. cd go-grpc-examples-benchmark
 3. make all
 4. server side
- - ./unary_server -port 9990
+ - ./echo_server -port 9990
 5. client side
- - ./unary_client -ip 192.168.0.65 -port 9990 -len 65536 -conn 20 -worker 5
- - ./unary_client -ip 192.168.0.65 -port 9990 -len 32768 -conn 5 -worker 5
- - ./unary_client -ip 192.168.0.65 -port 9990 -len 512 -conn 5 -worker 1
+ - ./echo_client -ip 192.168.0.65 -port 9990 -len 65536 -conn 20 -worker 5
+ - ./echo_client -ip 192.168.0.65 -port 9990 -len 32768 -conn 5 -worker 5
+ - ./echo_client -ip 192.168.0.65 -port 9990 -len 512 -conn 5 -worker 1
 
 ## flags
 

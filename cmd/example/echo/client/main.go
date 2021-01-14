@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
 	"flag"
 	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/example"
+	"github.com/ppzxc/go-grpc-examples-benchmark/utils"
 	"google.golang.org/grpc"
 	"log"
 	"os"
@@ -14,12 +14,6 @@ import (
 	"sync"
 	"syscall"
 )
-
-func GenerateRandomBytes(n int) []byte {
-	b := make([]byte, n)
-	_, _ = rand.Read(b)
-	return b
-}
 
 var (
 	ip            = flag.String("ip", "localhost", "The server port")
@@ -34,7 +28,7 @@ var connArray []*grpc.ClientConn
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	flag.Parse()
-	payload := GenerateRandomBytes(*payloadLength)
+	payload := utils.GenerateRandomBytes(*payloadLength)
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
@@ -67,20 +61,6 @@ func main() {
 	wg.Wait()
 }
 
-type UUID struct {
-	mu   sync.Mutex
-	uuid uint64
-}
-
-func (u *UUID) Get() uint64 {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	u.uuid = u.uuid + 1
-	return u.uuid
-}
-
-var Uuid UUID
-
 func NewGRPCClient(ctx context.Context, cn int, gn int, conn *grpc.ClientConn, wg *sync.WaitGroup, payload []byte) {
 	c := pb.NewExampleClient(conn)
 	go func() {
@@ -92,13 +72,13 @@ func NewGRPCClient(ctx context.Context, cn int, gn int, conn *grpc.ClientConn, w
 			default:
 			}
 			pur := &pb.Request{
-				Uid:          Uuid.Get(),
+				Uid:          utils.Uuid.Get(),
 				Message:      payload,
 				Len:          int32(len(payload)),
 				ConnNumber:   int32(cn),
 				WorkerNumber: int32(gn),
 			}
-			ur, err := c.UnaryEcho(ctx, pur)
+			ur, err := c.Echo(ctx, pur)
 
 			if err != nil {
 				log.Fatal(err)
