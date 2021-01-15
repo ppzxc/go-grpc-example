@@ -19,6 +19,7 @@ import (
 
 var (
 	port          = flag.Int("port", 9990, "The server port")
+	count         = flag.Int("count", 10000, "The server port")
 	payloadLength = flag.Int("len", 4*1023*1024, "The send payload length")
 	payload       = []byte("")
 )

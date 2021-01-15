@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
 	"flag"
 	pb "github.com/ppzxc/go-grpc-examples-benchmark/proto/example"
 	"github.com/ppzxc/go-grpc-examples-benchmark/utils"
@@ -17,12 +16,6 @@ import (
 	"syscall"
 )
 
-func GenerateRandomBytes(n int) []byte {
-	b := make([]byte, n)
-	_, _ = rand.Read(b)
-	return b
-}
-
 var (
 	ip            = flag.String("ip", "localhost", "The server port")
 	port          = flag.Int("port", 9990, "The server port")
@@ -36,7 +29,7 @@ var connArray []*grpc.ClientConn
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	flag.Parse()
-	payload := GenerateRandomBytes(*payloadLength)
+	payload := utils.GenerateRandomBytes(*payloadLength)
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)

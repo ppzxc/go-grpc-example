@@ -21,6 +21,7 @@ var (
 	payloadLength = flag.Int("len", 4*1023*1024, "The send payload length")
 	connCount     = flag.Int("conn", 10, "The connection count to grpc server")
 	workerCount   = flag.Int("worker", 10, "The conn per worker")
+	sendingCount  = flag.Int("count", 100000, "The conn per worker")
 )
 
 var connArray []*grpc.ClientConn
@@ -65,18 +66,18 @@ func NewGRPCClient(ctx context.Context, cn int, gn int, conn *grpc.ClientConn, w
 	c := pb.NewExampleClient(conn)
 	go func() {
 		defer wg.Done()
-		for {
-			select {
-			case <-ctx.Done():
-				break
-			default:
-			}
-			cs, err := c.ClientStream(ctx)
+		select {
+		case <-ctx.Done():
+			break
+		default:
+		}
+		cs, err := c.ClientStream(ctx)
+		if err != nil {
 			if err != nil {
-				if err != nil {
-					log.Fatal(err)
-				}
+				log.Fatal(err)
 			}
+		}
+		for i := 0; i < *sendingCount; i++ {
 			pur := &pb.Request{
 				Uid:          utils.Uuid.Get(),
 				Message:      payload,
@@ -88,13 +89,17 @@ func NewGRPCClient(ctx context.Context, cn int, gn int, conn *grpc.ClientConn, w
 			if err != nil {
 				log.Fatal(err)
 			}
-			res, e := cs.CloseAndRecv()
-			if e != nil {
-				log.Fatal(e)
-				return
-			}
-			log.Printf("CN:%d WN:%d SUBMIT REQUEST UID:%d MLEN:%d LEN:%d ::==:: RECEIVED RESPONSE UID:%d MLEN:%d LEN:%d", cn, gn, pur.GetUid(), len(pur.GetMessage()), pur.GetLen(), res.GetUid(), len(res.GetMessage()), res.GetLen())
-			//return
+			log.Printf("CN:%d WN:%d SUBMIT REQUEST UID:%d MLEN:%d LEN:%d", cn, gn, pur.GetUid(), len(pur.GetMessage()), pur.GetLen())
 		}
+		err = cs.Send(&pb.Request{Len: int32(-1)})
+		if err != nil {
+			log.Fatal(err)
+		}
+		res, e := cs.CloseAndRecv()
+		if e != nil {
+			log.Fatal(e)
+			return
+		}
+		log.Printf("%s\r\n", res.String())
 	}()
 }

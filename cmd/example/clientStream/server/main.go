@@ -61,14 +61,15 @@ func (s *server) ClientStream(stream pb.Example_ClientStreamServer) error {
 			return err
 		}
 		log.Printf("ClientStreamServer, recv message send UID:%d CN:%d WN:%d LEN:%d \r\n", req.GetUid(), req.GetConnNumber(), req.GetWorkerNumber(), req.Len)
-		if err := stream.SendAndClose(&pb.Response{
-			Uid:          req.Uid,
-			Message:      []byte("DONE"),
-			Len:          req.GetLen(),
-			ConnNumber:   req.GetConnNumber(),
-			WorkerNumber: req.GetWorkerNumber(),
-		}); err != nil {
-			log.Printf("ClientStreamServer, stream.SendAndClose() error occurred %v\r\n", err)
+		if req.GetLen() == -1 {
+			break
 		}
 	}
+
+	if err := stream.SendAndClose(&pb.Response{
+		Message: []byte("DONE"),
+	}); err != nil {
+		log.Printf("ClientStreamServer, stream.SendAndClose() error occurred %v\r\n", err)
+	}
+	return nil
 }

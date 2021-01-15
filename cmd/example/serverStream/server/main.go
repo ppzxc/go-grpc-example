@@ -16,6 +16,7 @@ import (
 
 var (
 	port          = flag.Int("port", 9990, "The server port")
+	count         = flag.Int("count", 10000, "The server port")
 	payloadLength = flag.Int("len", 4*1023*1024, "The send payload length")
 	payload       = []byte("")
 )
@@ -56,16 +57,28 @@ type server struct {
 }
 
 func (s *server) ServerStream(req *pb.Request, stream pb.Example_ServerStreamServer) error {
-	for {
-		log.Printf("ServerStreamServer, recv message UID:%d MSG:%s CN:%d WN:%d LEN:%d SERVER PUSH START\r\n", req.GetUid(), string(req.GetMessage()), req.GetConnNumber(), req.GetWorkerNumber(), req.Len)
-		if err := stream.Send(&pb.Response{
-			Uid:          req.Uid,
+	log.Printf("ServerStreamServer, recv message UID:%d MSG:%s CN:%d WN:%d LEN:%d SERVER PUSH START\r\n", req.GetUid(), string(req.GetMessage()), req.GetConnNumber(), req.GetWorkerNumber(), req.Len)
+	for i := 0; i < *count; i++ {
+		res := &pb.Response{
+			Uid:          utils.Uuid.Get(),
 			Message:      payload,
 			Len:          int32(len(payload)),
 			ConnNumber:   req.GetConnNumber(),
 			WorkerNumber: req.GetWorkerNumber(),
-		}); err != nil {
-			log.Printf("ServerStreamServer, stream.Send() error occurred %v\r\n", err)
 		}
+		if err := stream.Send(res); err != nil {
+			log.Printf("ServerStreamServer, stream.Send() error occurred %v\r\n", err)
+			return err
+		}
+		log.Printf("ServerStreamServer, push UID:%d CN:%d WN:%d LEN:%d\r\n", res.GetUid(), res.GetConnNumber(), res.GetWorkerNumber(), res.Len)
 	}
+
+	log.Printf("ServerStreamServer, Close Server Stream\r\n")
+	if err := stream.Send(&pb.Response{
+		Len: int32(-1),
+	}); err != nil {
+		log.Printf("ServerStreamServer, stream.Send() error occurred %v\r\n", err)
+		return err
+	}
+	return nil
 }
