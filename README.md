@@ -3,8 +3,8 @@
 - https://github.com/grpc/grpc-go
 
 ## usage
-1. git clone https://github.com/ppzxc/go-grpc-examples-benchmark.git
-2. cd go-grpc-examples-benchmark
+1. git clone https://github.com/ppzxc/go-grpc-example
+2. cd go-grpc-examples
 3. make all
 4. echo
 ```shell
